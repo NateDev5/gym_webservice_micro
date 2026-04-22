@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$/../.." dumb="true">
+      <sourceFolder url="file://$MODULE_DIR$/../../api-gateway/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../api-gateway/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../api-gateway/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../enrollment-service/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../enrollment-service/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../enrollment-service/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../member-service/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../member-service/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../member-service/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../schedule-service/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../schedule-service/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../schedule-service/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../trainer-service/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../trainer-service/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../trainer-service/src/test/java" isTestSource="true" />
+    </content>
+  </component>
+</module>

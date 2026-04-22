@@ -1,0 +1,44 @@
+CREATE TABLE enrollments (
+    enrollment_id VARCHAR(36) PRIMARY KEY,
+    member_id VARCHAR(36) NOT NULL
+);
+
+CREATE TABLE enrollment_items (
+    registration_id UUID PRIMARY KEY,
+    enrollment_id VARCHAR(36) NOT NULL,
+    enrollment_date TIMESTAMP NOT NULL,
+    enrollment_status VARCHAR(50) NOT NULL,
+    class_session_id VARCHAR(36) NOT NULL,
+    trainer_id VARCHAR(36) NOT NULL,
+    schedule_id VARCHAR(36) NOT NULL,
+    seat_number INTEGER,
+    CONSTRAINT fk_enrollment_items_enrollment
+        FOREIGN KEY (enrollment_id) REFERENCES enrollments (enrollment_id) ON DELETE CASCADE
+);
+
+INSERT INTO enrollments (enrollment_id, member_id)
+VALUES
+    ('a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d', '21f9d274-2aa5-4bfc-b3d2-b641046b0d0b'),
+    ('b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6e', 'b6d8ed6a-b254-4d94-8654-2fa957ceaec5'),
+    ('c3d4e5f6-a7b8-6c7d-0e1f-2a3b4c5d6e7f', '3d872866-67d0-471b-97f1-d69552eb1134'),
+    ('d4e5f6a7-b8c9-7d8e-1f2a-3b4c5d6e7f8a', '860340e1-6aaf-4bdd-90ae-7d3f7b925f8b'),
+    ('e5f6a7b8-c9d0-8e9f-2a3b-4c5d6e7f8a9b', '49d3c2d4-eb15-407c-91a9-2db3c19a8253');
+
+INSERT INTO enrollment_items (
+    registration_id,
+    enrollment_id,
+    enrollment_date,
+    enrollment_status,
+    class_session_id,
+    trainer_id,
+    schedule_id,
+    seat_number
+)
+VALUES
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d', '2026-04-01 09:00:00', 'ENROLLED', 'a1a1a1a1-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '81000000-0000-0000-0000-000000000001', 1),
+    ('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d', '2026-04-01 10:00:00', 'ENROLLED', 'b2b2b2b2-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', '81000000-0000-0000-0000-000000000002', 5),
+    ('550e8400-e29b-41d4-a716-446655440000', 'b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6e', '2026-04-02 08:30:00', 'ENROLLED', 'c3c3c3c3-3333-3333-3333-333333333333', '33333333-3333-3333-3333-333333333333', '81000000-0000-0000-0000-000000000003', 3),
+    ('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'c3d4e5f6-a7b8-6c7d-0e1f-2a3b4c5d6e7f', '2026-03-15 14:00:00', 'CANCELLED', 'd4d4d4d4-4444-4444-4444-444444444444', '44444444-4444-4444-4444-444444444444', '81000000-0000-0000-0000-000000000004', NULL),
+    ('6ba7b811-9dad-11d1-80b4-00c04fd430c8', 'd4e5f6a7-b8c9-7d8e-1f2a-3b4c5d6e7f8a', '2026-04-03 11:00:00', 'ENROLLED', 'e5e5e5e5-5555-5555-5555-555555555555', '55555555-5555-5555-5555-555555555555', '81000000-0000-0000-0000-000000000005', 2),
+    ('6ba7b812-9dad-11d1-80b4-00c04fd430c8', 'd4e5f6a7-b8c9-7d8e-1f2a-3b4c5d6e7f8a', '2026-04-03 12:00:00', 'PENDING', 'f6f6f6f6-6666-6666-6666-666666666666', '66666666-6666-6666-6666-666666666666', '81000000-0000-0000-0000-000000000006', NULL),
+    ('6ba7b814-9dad-11d1-80b4-00c04fd430c8', 'e5f6a7b8-c9d0-8e9f-2a3b-4c5d6e7f8a9b', '2026-04-04 16:00:00', 'ENROLLED', 'a7a7a7a7-7777-7777-7777-777777777777', '77777777-7777-7777-7777-777777777777', '81000000-0000-0000-0000-000000000007', 8);
