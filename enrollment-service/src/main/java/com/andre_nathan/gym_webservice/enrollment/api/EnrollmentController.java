@@ -6,6 +6,10 @@ import com.andre_nathan.gym_webservice.enrollment.api.dto.EnrollmentResponse;
 import com.andre_nathan.gym_webservice.enrollment.api.dto.UpdateEnrollmentRequest;
 import com.andre_nathan.gym_webservice.enrollment.application.service.EnrollmentCrudService;
 import com.andre_nathan.gym_webservice.enrollment.application.service.EnrollmentOrchestrator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -17,6 +21,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/enrollments")
+@Tag(name = "Enrollment")
 public class EnrollmentController {
     private final EnrollmentCrudService crudService;
     private final EnrollmentOrchestrator orchestrator;
@@ -33,6 +38,13 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enroll")
+    @Operation(summary = "Enroll member in class")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Enrollment created"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Referenced resource not found"),
+            @ApiResponse(responseCode = "409", description = "Business rule conflict")
+    })
     public ResponseEntity<EnrollmentResponse> enrollInClass(@RequestBody @Valid EnrollClassRequest request) {
         var enrollment = orchestrator.enrollMemberInClass(
                 request.memberId(),
@@ -44,6 +56,13 @@ public class EnrollmentController {
     }
 
     @PostMapping("/cancel")
+    @Operation(summary = "Cancel member enrollment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollment cancelled"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Referenced resource not found"),
+            @ApiResponse(responseCode = "409", description = "Business rule conflict")
+    })
     public ResponseEntity<EnrollmentResponse> cancelEnrollment(@RequestBody @Valid CancelEnrollmentRequest request) {
         var enrollment = orchestrator.cancelEnrollment(
                 request.memberId(),
@@ -53,12 +72,21 @@ public class EnrollmentController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get enrollment by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollment found"),
+            @ApiResponse(responseCode = "404", description = "Enrollment not found")
+    })
     public ResponseEntity<EnrollmentResponse> getById(@PathVariable String id) {
         var enrollment = crudService.getById(id);
         return ResponseEntity.ok(assembler.toModel(enrollment));
     }
 
     @GetMapping
+    @Operation(summary = "List all enrollments")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollments returned")
+    })
     public ResponseEntity<CollectionModel<EnrollmentResponse>> getAll() {
         var enrollments = crudService.getAll();
         var responses = enrollments.stream()
@@ -72,6 +100,12 @@ public class EnrollmentController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update enrollment aggregate owner")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollment updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Enrollment not found")
+    })
     public ResponseEntity<EnrollmentResponse> update(@PathVariable String id, @RequestBody @Valid UpdateEnrollmentRequest request) {
         var existing = crudService.getById(id);
         var updated = crudService.update(id, request.memberId(), existing.getRegisteredClasses());
@@ -79,6 +113,10 @@ public class EnrollmentController {
     }
 
     @GetMapping("/member/{memberId}")
+    @Operation(summary = "Get enrollments by member id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollments returned")
+    })
     public ResponseEntity<CollectionModel<EnrollmentResponse>> getByMemberId(@PathVariable String memberId) {
         var enrollments = crudService.getAllForMember(memberId);
         var responses = enrollments.stream()
@@ -93,6 +131,10 @@ public class EnrollmentController {
     }
 
     @GetMapping("/schedule/{scheduleId}")
+    @Operation(summary = "Get enrollments by schedule id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollments returned")
+    })
     public ResponseEntity<CollectionModel<EnrollmentResponse>> getByScheduleId(@PathVariable String scheduleId) {
         var enrollments = crudService.getAllForSchedule(scheduleId);
         var responses = enrollments.stream()
@@ -107,6 +149,10 @@ public class EnrollmentController {
     }
 
     @GetMapping("/trainer/{trainerId}")
+    @Operation(summary = "Get enrollments by trainer id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Enrollments returned")
+    })
     public ResponseEntity<CollectionModel<EnrollmentResponse>> getByTrainerId(@PathVariable String trainerId) {
         var enrollments = crudService.getAllForTrainer(trainerId);
         var responses = enrollments.stream()
@@ -121,6 +167,11 @@ public class EnrollmentController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete enrollment aggregate")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Enrollment deleted"),
+            @ApiResponse(responseCode = "404", description = "Enrollment not found")
+    })
     public ResponseEntity<Void> delete(@PathVariable String id) {
         crudService.delete(id);
         return ResponseEntity.noContent().build();
