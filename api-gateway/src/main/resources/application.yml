@@ -10,7 +10,7 @@ spring:
             - id: enrollment-service
               uri: http://localhost:8081
               predicates:
-                - Path=/api/enrollment/**
+                - Path=/api/enrollments/**
 
             - id: member-service
               uri: http://localhost:8082
@@ -27,6 +27,34 @@ spring:
               predicates:
                 - Path=/api/trainers/**
 
+            - id: enrollment-service-docs
+              uri: http://localhost:8081
+              predicates:
+                - Path=/swagger-docs/enrollment-service
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: member-service-docs
+              uri: http://localhost:8082
+              predicates:
+                - Path=/swagger-docs/member-service
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: schedule-service-docs
+              uri: http://localhost:8083
+              predicates:
+                - Path=/swagger-docs/schedule-service
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: trainer-service-docs
+              uri: http://localhost:8084
+              predicates:
+                - Path=/swagger-docs/trainer-service
+              filters:
+                - SetPath=/v3/api-docs
+
 server:
   port: 8080
 
@@ -35,13 +63,13 @@ springdoc:
     path: /swagger-ui.html
     urls:
       - name: enrollment-service
-        url: http://localhost:8081/v3/api-docs
+        url: /swagger-docs/enrollment-service
 
       - name: member-service
-        url: http://localhost:8082/v3/api-docs
+        url: /swagger-docs/member-service
 
       - name: schedule-service
-        url: http://localhost:8083/v3/api-docs
+        url: /swagger-docs/schedule-service
 
       - name: trainer-service
-        url: http://localhost:8084/v3/api-docs
+        url: /swagger-docs/trainer-service

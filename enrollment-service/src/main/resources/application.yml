@@ -30,3 +30,11 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+services:
+  member:
+    base-url: ${MEMBER_SERVICE_BASE_URL:http://localhost:8082}
+  schedule:
+    base-url: ${SCHEDULE_SERVICE_BASE_URL:http://localhost:8083}
+  trainer:
+    base-url: ${TRAINER_SERVICE_BASE_URL:http://localhost:8084}

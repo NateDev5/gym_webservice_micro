@@ -1,4 +1,4 @@
-package com.andre_nathan.gym_webservice.enrollment.persistence;
+package com.andre_nathan.gym_webservice.enrollment.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

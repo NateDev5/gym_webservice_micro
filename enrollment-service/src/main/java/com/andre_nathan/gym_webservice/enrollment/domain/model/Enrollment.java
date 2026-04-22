@@ -1,7 +1,7 @@
 package com.andre_nathan.gym_webservice.enrollment.domain.model;
 
 import com.andre_nathan.gym_webservice.enrollment.domain.exception.AlreadyRegisteredException;
-import com.andre_nathan.gym_webservice.member.domain.model.MemberId;
+import com.andre_nathan.gym_webservice.enrollment.domain.exception.EnrollmentRecordNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,16 +10,16 @@ import java.util.UUID;
 
 public class Enrollment {
     private final EnrollmentId enrollmentId;
-    private MemberId memberId;
+    private final String memberId;
     private List<EnrollmentItem> registeredClasses;
 
     public Enrollment(
             EnrollmentId enrollmentId,
-            MemberId memberId,
+            String memberId,
             List<EnrollmentItem> registeredClasses
     ) {
         this.enrollmentId = Objects.requireNonNull(enrollmentId, "enrollmentId cannot be null");
-        this.memberId = Objects.requireNonNull(memberId, "memberId cannot be null");
+        this.memberId = requireText(memberId, "memberId");
         this.registeredClasses = List.copyOf(Objects.requireNonNull(registeredClasses, "registeredClasses cannot be null"));
     }
 
@@ -27,7 +27,7 @@ public class Enrollment {
         return enrollmentId;
     }
 
-    public MemberId getMemberId() {
+    public String getMemberId() {
         return memberId;
     }
 
@@ -40,7 +40,7 @@ public class Enrollment {
     }
 
     public void enroll(ClassSessionId classSessionId, String trainerId, String scheduleId, Integer seatNumber) {
-        // Membership validity must be checked outside this aggregate because it only holds MemberId.
+        // Membership validity must be checked outside this aggregate.
         Objects.requireNonNull(classSessionId, "classSessionId cannot be null");
         Objects.requireNonNull(trainerId, "trainerId cannot be null");
         Objects.requireNonNull(scheduleId, "scheduleId cannot be null");
@@ -72,7 +72,7 @@ public class Enrollment {
         return registeredClasses.stream()
                 .filter(item -> item.getClassSessionId().equals(classSessionId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Member is not enrolled in class session " + classSessionId.value()));
+                .orElseThrow(() -> new EnrollmentRecordNotFoundException(classSessionId.value()));
     }
 
     public void cancelEnrollment(ClassSessionId classSessionId) {
@@ -82,10 +82,18 @@ public class Enrollment {
         EnrollmentItem item = updatedRegisteredClasses.stream()
                 .filter(existingItem -> existingItem.getClassSessionId().equals(classSessionId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Member is not enrolled in class session " + classSessionId.value()));
+                .orElseThrow(() -> new EnrollmentRecordNotFoundException(classSessionId.value()));
 
         item.cancel();
 
         this.registeredClasses = List.copyOf(updatedRegisteredClasses);
+    }
+
+    private String requireText(String value, String fieldName) {
+        String normalizedValue = Objects.requireNonNull(value, fieldName + " cannot be null").trim();
+        if (normalizedValue.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " cannot be blank");
+        }
+        return normalizedValue;
     }
 }

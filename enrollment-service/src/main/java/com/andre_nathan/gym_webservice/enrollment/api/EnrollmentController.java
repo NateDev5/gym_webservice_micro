@@ -3,6 +3,7 @@ package com.andre_nathan.gym_webservice.enrollment.api;
 import com.andre_nathan.gym_webservice.enrollment.api.dto.CancelEnrollmentRequest;
 import com.andre_nathan.gym_webservice.enrollment.api.dto.EnrollClassRequest;
 import com.andre_nathan.gym_webservice.enrollment.api.dto.EnrollmentResponse;
+import com.andre_nathan.gym_webservice.enrollment.api.dto.UpdateEnrollmentRequest;
 import com.andre_nathan.gym_webservice.enrollment.application.service.EnrollmentCrudService;
 import com.andre_nathan.gym_webservice.enrollment.application.service.EnrollmentOrchestrator;
 import jakarta.validation.Valid;
@@ -35,9 +36,9 @@ public class EnrollmentController {
     public ResponseEntity<EnrollmentResponse> enrollInClass(@RequestBody @Valid EnrollClassRequest request) {
         var enrollment = orchestrator.enrollMemberInClass(
                 request.memberId(),
-                request.classSessionId()
-                // TODO: request.trainerId(),
-                // TODO: request.scheduleId()
+                request.classSessionId(),
+                request.trainerId(),
+                request.scheduleId()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(assembler.toModel(enrollment));
     }
@@ -70,6 +71,13 @@ public class EnrollmentController {
         return ResponseEntity.ok(collectionModel);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<EnrollmentResponse> update(@PathVariable String id, @RequestBody @Valid UpdateEnrollmentRequest request) {
+        var existing = crudService.getById(id);
+        var updated = crudService.update(id, request.memberId(), existing.getRegisteredClasses());
+        return ResponseEntity.ok(assembler.toModel(updated));
+    }
+
     @GetMapping("/member/{memberId}")
     public ResponseEntity<CollectionModel<EnrollmentResponse>> getByMemberId(@PathVariable String memberId) {
         var enrollments = crudService.getAllForMember(memberId);
@@ -84,12 +92,37 @@ public class EnrollmentController {
         return ResponseEntity.ok(collectionModel);
     }
 
+    @GetMapping("/schedule/{scheduleId}")
+    public ResponseEntity<CollectionModel<EnrollmentResponse>> getByScheduleId(@PathVariable String scheduleId) {
+        var enrollments = crudService.getAllForSchedule(scheduleId);
+        var responses = enrollments.stream()
+                .map(assembler::toModel)
+                .toList();
+
+        var collectionModel = CollectionModel.of(responses);
+        collectionModel.add(linkTo(methodOn(EnrollmentController.class).getByScheduleId(scheduleId)).withSelfRel());
+        collectionModel.add(linkTo(methodOn(EnrollmentController.class).getAll()).withRel("all-enrollments"));
+
+        return ResponseEntity.ok(collectionModel);
+    }
+
+    @GetMapping("/trainer/{trainerId}")
+    public ResponseEntity<CollectionModel<EnrollmentResponse>> getByTrainerId(@PathVariable String trainerId) {
+        var enrollments = crudService.getAllForTrainer(trainerId);
+        var responses = enrollments.stream()
+                .map(assembler::toModel)
+                .toList();
+
+        var collectionModel = CollectionModel.of(responses);
+        collectionModel.add(linkTo(methodOn(EnrollmentController.class).getByTrainerId(trainerId)).withSelfRel());
+        collectionModel.add(linkTo(methodOn(EnrollmentController.class).getAll()).withRel("all-enrollments"));
+
+        return ResponseEntity.ok(collectionModel);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         crudService.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-    // TODO: Add endpoint to get enrollments by schedule
-    // TODO: Add endpoint to get enrollments by trainer
 }

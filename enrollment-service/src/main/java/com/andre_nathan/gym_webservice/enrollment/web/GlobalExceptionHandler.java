@@ -1,9 +1,15 @@
 package com.andre_nathan.gym_webservice.enrollment.web;
 
 import com.andre_nathan.gym_webservice.enrollment.application.exception.ClassSessionFullException;
+import com.andre_nathan.gym_webservice.enrollment.application.exception.ClassSessionNotFoundException;
 import com.andre_nathan.gym_webservice.enrollment.application.exception.EnrollmentNotFoundException;
+import com.andre_nathan.gym_webservice.enrollment.application.exception.InactiveTrainerException;
 import com.andre_nathan.gym_webservice.enrollment.application.exception.InvalidMembershipException;
+import com.andre_nathan.gym_webservice.enrollment.application.exception.MemberNotFoundException;
+import com.andre_nathan.gym_webservice.enrollment.application.exception.TrainerNotFoundException;
+import com.andre_nathan.gym_webservice.enrollment.application.exception.TrainerSpecialtyMismatchException;
 import com.andre_nathan.gym_webservice.enrollment.domain.exception.AlreadyRegisteredException;
+import com.andre_nathan.gym_webservice.enrollment.domain.exception.EnrollmentRecordNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +24,23 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(EnrollmentNotFoundException.class)
+    @ExceptionHandler({
+            EnrollmentNotFoundException.class,
+            MemberNotFoundException.class,
+            TrainerNotFoundException.class,
+            ClassSessionNotFoundException.class
+    })
     public ResponseEntity<ApiErrorResponse> handleNotFound(RuntimeException ex, HttpServletRequest req) {
         return buildError(HttpStatus.NOT_FOUND, ex.getMessage(), req, List.of());
     }
 
     @ExceptionHandler({
             AlreadyRegisteredException.class,
+            EnrollmentRecordNotFoundException.class,
             ClassSessionFullException.class,
-            InvalidMembershipException.class
+            InvalidMembershipException.class,
+            InactiveTrainerException.class,
+            TrainerSpecialtyMismatchException.class
     })
     public ResponseEntity<ApiErrorResponse> handleConflict(RuntimeException ex, HttpServletRequest req) {
         return buildError(HttpStatus.CONFLICT, ex.getMessage(), req, List.of());

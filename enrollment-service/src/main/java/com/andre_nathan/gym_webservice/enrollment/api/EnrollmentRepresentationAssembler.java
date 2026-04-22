@@ -1,14 +1,12 @@
 package com.andre_nathan.gym_webservice.enrollment.api;
 
 import com.andre_nathan.gym_webservice.enrollment.api.dto.EnrollmentResponse;
+import com.andre_nathan.gym_webservice.enrollment.application.port.out.MemberPort;
+import com.andre_nathan.gym_webservice.enrollment.application.port.out.SchedulePort;
+import com.andre_nathan.gym_webservice.enrollment.application.port.out.TrainerPort;
 import com.andre_nathan.gym_webservice.enrollment.domain.model.Enrollment;
 import com.andre_nathan.gym_webservice.enrollment.domain.model.EnrollmentItem;
-import com.andre_nathan.gym_webservice.member.api.MemberController;
-import com.andre_nathan.gym_webservice.member.application.port.out.MemberRepositoryPort;
-import com.andre_nathan.gym_webservice.schedule.api.ScheduleController;
-import com.andre_nathan.gym_webservice.schedule.application.port.out.ScheduleRepositoryPort;
-import com.andre_nathan.gym_webservice.trainer.api.TrainerController;
-import com.andre_nathan.gym_webservice.trainer.application.port.out.TrainerRepositoryPort;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.stereotype.Component;
 
@@ -17,54 +15,54 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class EnrollmentRepresentationAssembler extends RepresentationModelAssemblerSupport<Enrollment, EnrollmentResponse> {
-    private final MemberRepositoryPort memberRepository;
-    private final TrainerRepositoryPort trainerRepository;
-    private final ScheduleRepositoryPort scheduleRepository;
+    private final MemberPort memberPort;
+    private final TrainerPort trainerPort;
+    private final SchedulePort schedulePort;
 
     public EnrollmentRepresentationAssembler(
-            MemberRepositoryPort memberRepository,
-            TrainerRepositoryPort trainerRepository,
-            ScheduleRepositoryPort scheduleRepository
+            MemberPort memberPort,
+            TrainerPort trainerPort,
+            SchedulePort schedulePort
     ) {
         super(EnrollmentController.class, EnrollmentResponse.class);
-        this.memberRepository = memberRepository;
-        this.trainerRepository = trainerRepository;
-        this.scheduleRepository = scheduleRepository;
+        this.memberPort = memberPort;
+        this.trainerPort = trainerPort;
+        this.schedulePort = schedulePort;
     }
 
     @Override
     public EnrollmentResponse toModel(Enrollment enrollment) {
-        var member = memberRepository.findById(enrollment.getMemberId()).orElse(null);
+        var member = memberPort.findById(enrollment.getMemberId()).orElse(null);
         var items = enrollment.getRegisteredClasses().stream()
                 .map(this::toItemResponse)
                 .toList();
 
         EnrollmentResponse response = new EnrollmentResponse(
                 enrollment.getEnrollmentId().value(),
-                enrollment.getMemberId().value(),
-                member == null ? null : member.getFullName().value(),
-                member == null ? null : member.getMembershipStatus().name(),
+                enrollment.getMemberId(),
+                member == null ? null : member.fullName(),
+                member == null ? null : member.membershipStatus(),
                 items
         );
 
         response.add(linkTo(methodOn(EnrollmentController.class).getById(enrollment.getEnrollmentId().value())).withSelfRel());
         response.add(linkTo(methodOn(EnrollmentController.class).getAll()).withRel("enrollments"));
-        response.add(linkTo(methodOn(EnrollmentController.class).getByMemberId(enrollment.getMemberId().value())).withRel("member-enrollments"));
+        response.add(linkTo(methodOn(EnrollmentController.class).getByMemberId(enrollment.getMemberId())).withRel("member-enrollments"));
 
-        response.add(linkTo(methodOn(MemberController.class).get(enrollment.getMemberId().value())).withRel("member"));
+        response.add(Link.of("/api/members/" + enrollment.getMemberId()).withRel("member"));
 
         if (!enrollment.getRegisteredClasses().isEmpty()) {
             EnrollmentItem lastItem = enrollment.getRegisteredClasses().get(enrollment.getRegisteredClasses().size() - 1);
-            response.add(linkTo(methodOn(ScheduleController.class).getByClassSessionId(lastItem.getClassSessionId().value())).withRel("class-session"));
-            response.add(linkTo(methodOn(TrainerController.class).getById(lastItem.getTrainerId())).withRel("trainer"));
+            response.add(Link.of("/api/schedules/class-sessions/" + lastItem.getClassSessionId().value()).withRel("class-session"));
+            response.add(Link.of("/api/trainers/" + lastItem.getTrainerId()).withRel("trainer"));
         }
 
         return response;
     }
 
     private EnrollmentResponse.EnrollmentItemResponse toItemResponse(EnrollmentItem item) {
-        var schedule = scheduleRepository.findByClassSessionId(item.getClassSessionId().value()).orElse(null);
-        var trainer = trainerRepository.findById(com.andre_nathan.gym_webservice.trainer.domain.model.TrainerId.of(item.getTrainerId())).orElse(null);
+        var schedule = schedulePort.findByClassSessionId(item.getClassSessionId().value()).orElse(null);
+        var trainer = trainerPort.findById(item.getTrainerId()).orElse(null);
 
         return new EnrollmentResponse.EnrollmentItemResponse(
                 item.getRegistrationId(),
@@ -72,15 +70,15 @@ public class EnrollmentRepresentationAssembler extends RepresentationModelAssemb
                 item.getEnrollmentStatus().name(),
                 item.getClassSessionId().value(),
                 item.getScheduleId(),
-                schedule == null ? null : schedule.getClassName(),
-                schedule == null ? null : schedule.getClassType(),
+                schedule == null ? null : schedule.className(),
+                schedule == null ? null : schedule.classType(),
                 item.getTrainerId(),
-                trainer == null ? null : trainer.getFullName().value(),
-                schedule == null ? null : schedule.getClassSession().getSessionStatus(),
-                schedule == null ? null : schedule.getTimeSlot().start(),
-                schedule == null ? null : schedule.getTimeSlot().end(),
-                schedule == null ? null : schedule.getRoom().getRoomId().value(),
-                schedule == null ? null : schedule.getRoom().getRoomName(),
+                trainer == null ? null : trainer.fullName(),
+                schedule == null ? null : schedule.sessionStatus(),
+                schedule == null ? null : schedule.startTime(),
+                schedule == null ? null : schedule.endTime(),
+                schedule == null ? null : schedule.roomId(),
+                schedule == null ? null : schedule.roomName(),
                 item.getSeatNumber()
         );
     }

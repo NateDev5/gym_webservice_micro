@@ -1,8 +1,7 @@
-package com.andre_nathan.gym_webservice.enrollment.persistence;
+package com.andre_nathan.gym_webservice.enrollment.infrastructure.persistence;
 
 import com.andre_nathan.gym_webservice.enrollment.application.port.out.EnrollmentRepositoryPort;
 import com.andre_nathan.gym_webservice.enrollment.domain.model.*;
-import com.andre_nathan.gym_webservice.member.domain.model.MemberId;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -38,8 +37,8 @@ public class JpaEnrollmentRepositoryAdapter implements EnrollmentRepositoryPort 
     }
 
     @Override
-    public List<Enrollment> findAllForMember(MemberId memberId) {
-        return jpa.findAllByMemberId(memberId.value()).stream().map(this::toDomain).toList();
+    public List<Enrollment> findAllForMember(String memberId) {
+        return jpa.findAllByMemberId(memberId).stream().map(this::toDomain).toList();
     }
 
     @Override
@@ -50,7 +49,7 @@ public class JpaEnrollmentRepositoryAdapter implements EnrollmentRepositoryPort 
     private EnrollmentJpaEntity toEntity(Enrollment enrollment) {
         var e = new EnrollmentJpaEntity();
         e.enrollmentId = enrollment.getEnrollmentId().value();
-        e.memberId = enrollment.getMemberId().value();
+        e.memberId = enrollment.getMemberId();
         e.registeredClasses.clear();
 
         for (EnrollmentItem item : enrollment.getRegisteredClasses()) {
@@ -76,7 +75,7 @@ public class JpaEnrollmentRepositoryAdapter implements EnrollmentRepositoryPort 
 
         return new Enrollment(
                 EnrollmentId.of(entity.enrollmentId),
-                MemberId.of(entity.memberId),
+                entity.memberId,
                 items
         );
     }

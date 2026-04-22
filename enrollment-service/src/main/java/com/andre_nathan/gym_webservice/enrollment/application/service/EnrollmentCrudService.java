@@ -3,7 +3,6 @@ package com.andre_nathan.gym_webservice.enrollment.application.service;
 import com.andre_nathan.gym_webservice.enrollment.application.exception.EnrollmentNotFoundException;
 import com.andre_nathan.gym_webservice.enrollment.application.port.out.EnrollmentRepositoryPort;
 import com.andre_nathan.gym_webservice.enrollment.domain.model.*;
-import com.andre_nathan.gym_webservice.member.domain.model.MemberId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,7 @@ public class EnrollmentCrudService {
 
     @Transactional
     public Enrollment create(String memberId) {
-        MemberId parsedMemberId = MemberId.of(requireText(memberId, "memberId"));
+        String parsedMemberId = requireText(memberId, "memberId");
 
         Enrollment enrollment = new Enrollment(
                 EnrollmentId.newId(),
@@ -38,7 +37,7 @@ public class EnrollmentCrudService {
             List<EnrollmentItem> registeredClasses
     ) {
         EnrollmentId parsedEnrollmentId = EnrollmentId.of(requireText(enrollmentId, "enrollmentId"));
-        MemberId parsedMemberId = MemberId.of(requireText(memberId, "memberId"));
+        String parsedMemberId = requireText(memberId, "memberId");
 
         getById(parsedEnrollmentId);
 
@@ -64,8 +63,26 @@ public class EnrollmentCrudService {
 
     @Transactional(readOnly = true)
     public List<Enrollment> getAllForMember(String memberId) {
-        MemberId parsedMemberId = MemberId.of(requireText(memberId, "memberId"));
+        String parsedMemberId = requireText(memberId, "memberId");
         return repo.findAllForMember(parsedMemberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Enrollment> getAllForSchedule(String scheduleId) {
+        String parsedScheduleId = requireText(scheduleId, "scheduleId");
+        return repo.findAll().stream()
+                .filter(enrollment -> enrollment.getRegisteredClasses().stream()
+                        .anyMatch(item -> parsedScheduleId.equals(item.getScheduleId())))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Enrollment> getAllForTrainer(String trainerId) {
+        String parsedTrainerId = requireText(trainerId, "trainerId");
+        return repo.findAll().stream()
+                .filter(enrollment -> enrollment.getRegisteredClasses().stream()
+                        .anyMatch(item -> parsedTrainerId.equals(item.getTrainerId())))
+                .toList();
     }
 
     @Transactional

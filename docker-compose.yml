@@ -1,0 +1,166 @@
+version: "3.9"
+
+services:
+  member-db:
+    image: postgres:16
+    container_name: member-db
+    environment:
+      POSTGRES_DB: member_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    ports:
+      - "54321:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d member_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - member_pg_data:/var/lib/postgresql/data
+
+  trainer-db:
+    image: postgres:16
+    container_name: trainer-db
+    environment:
+      POSTGRES_DB: trainer_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    ports:
+      - "54322:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d trainer_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - trainer_pg_data:/var/lib/postgresql/data
+
+  schedule-db:
+    image: postgres:16
+    container_name: schedule-db
+    environment:
+      POSTGRES_DB: schedule_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    ports:
+      - "54323:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d schedule_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - schedule_pg_data:/var/lib/postgresql/data
+
+  enrollment-db:
+    image: postgres:16
+    container_name: enrollment-db
+    environment:
+      POSTGRES_DB: enrollment_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    ports:
+      - "54324:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d enrollment_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - enrollment_pg_data:/var/lib/postgresql/data
+
+  member-service:
+    build: ./member-service
+    container_name: member-service
+    environment:
+      SPRING_PROFILES_ACTIVE: pg
+      POSTGRES_HOST: member-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: member_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    depends_on:
+      member-db:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+
+  trainer-service:
+    build: ./trainer-service
+    container_name: trainer-service
+    environment:
+      SPRING_PROFILES_ACTIVE: pg
+      POSTGRES_HOST: trainer-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: trainer_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    depends_on:
+      trainer-db:
+        condition: service_healthy
+    ports:
+      - "8084:8084"
+
+  schedule-service:
+    build: ./schedule-service
+    container_name: schedule-service
+    environment:
+      SPRING_PROFILES_ACTIVE: pg
+      POSTGRES_HOST: schedule-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: schedule_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    depends_on:
+      schedule-db:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+
+  enrollment-service:
+    build: ./enrollment-service
+    container_name: enrollment-service
+    environment:
+      SPRING_PROFILES_ACTIVE: pg
+      POSTGRES_HOST: enrollment-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: enrollment_db
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+      MEMBER_SERVICE_BASE_URL: http://member-service:8082
+      SCHEDULE_SERVICE_BASE_URL: http://schedule-service:8083
+      TRAINER_SERVICE_BASE_URL: http://trainer-service:8084
+    depends_on:
+      enrollment-db:
+        condition: service_healthy
+      member-service:
+        condition: service_started
+      trainer-service:
+        condition: service_started
+      schedule-service:
+        condition: service_started
+    ports:
+      - "8081:8081"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      member-service:
+        condition: service_started
+      trainer-service:
+        condition: service_started
+      schedule-service:
+        condition: service_started
+      enrollment-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+
+volumes:
+  member_pg_data:
+  trainer_pg_data:
+  schedule_pg_data:
+  enrollment_pg_data:

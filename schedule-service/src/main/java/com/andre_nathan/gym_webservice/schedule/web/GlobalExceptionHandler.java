@@ -5,6 +5,7 @@ import com.andre_nathan.gym_webservice.schedule.application.exception.RoomBookin
 import com.andre_nathan.gym_webservice.schedule.application.exception.ScheduleNotFoundException;
 import com.andre_nathan.gym_webservice.schedule.application.exception.TrainerScheduleConflictException;
 import com.andre_nathan.gym_webservice.schedule.domain.exception.InvalidCapacityException;
+import com.andre_nathan.gym_webservice.schedule.domain.exception.InvalidTimeSlotException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             InvalidCapacityException.class,
+            InvalidTimeSlotException.class,
             IllegalArgumentException.class
     })
     public ResponseEntity<ApiErrorResponse> handleBadRequest(RuntimeException ex, HttpServletRequest req) {

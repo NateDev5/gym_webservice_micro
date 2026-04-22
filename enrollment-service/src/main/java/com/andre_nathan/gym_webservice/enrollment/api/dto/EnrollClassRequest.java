@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 
 public record EnrollClassRequest(
         @NotBlank String memberId,
-        @NotBlank String classSessionId
-        // TODO: String trainerId,
-        // TODO: String scheduleId
+        @NotBlank String classSessionId,
+        @NotBlank String trainerId,
+        @NotBlank String scheduleId
 ) {
 }
