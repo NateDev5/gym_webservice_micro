@@ -91,6 +91,38 @@ Notes:
 - service folders are split into `Positive` and `Negative` tests
 - setup and cleanup requests are in `00 Setup` and `05 Cleanup`
 
+## Milestone 2 Part 2 Testing
+
+All automated tests use the `testing` profile and run on H2 (no Docker required).
+
+Run tests + JaCoCo per service:
+
+```bash
+./gradlew :member-service:clean :member-service:test :member-service:jacocoTestReport
+./gradlew :trainer-service:clean :trainer-service:test :trainer-service:jacocoTestReport
+./gradlew :schedule-service:clean :schedule-service:test :schedule-service:jacocoTestReport
+./gradlew :enrollment-service:clean :enrollment-service:test :enrollment-service:jacocoTestReport
+./gradlew :api-gateway:clean :api-gateway:test :api-gateway:jacocoTestReport
+```
+
+Coverage report locations:
+
+- `member-service/build/reports/jacoco/test/html/index.html`
+- `trainer-service/build/reports/jacoco/test/html/index.html`
+- `schedule-service/build/reports/jacoco/test/html/index.html`
+- `enrollment-service/build/reports/jacoco/test/html/index.html`
+- `api-gateway/build/reports/jacoco/test/html/index.html`
+
+Run full distributed validation:
+
+```bash
+docker compose up --build
+```
+
+Then run the Postman collection against gateway base URL:
+
+- `http://localhost:8080`
+
 ## Ports and Container Mapping
 
 - Gateway: `8080:8080`

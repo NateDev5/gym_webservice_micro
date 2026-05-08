@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gym_webservice.iml" filepath="$PROJECT_DIR$/.idea/modules/gym_webservice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/enrollment-service/gym_webservice.enrollment-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/enrollment-service/gym_webservice.enrollment-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/member-service/gym_webservice.member-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/member-service/gym_webservice.member-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/schedule-service/gym_webservice.schedule-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/schedule-service/gym_webservice.schedule-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trainer-service/gym_webservice.trainer-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/trainer-service/gym_webservice.trainer-service.main.iml" />
     </modules>
   </component>
 </project>
